@@ -20,7 +20,15 @@ def return_release_year(one_year, two_year):
     try:
         return jsonify(get_netflix.search_range_years(one_year, two_year))
     except:
-        "Фильмы не найдены"
+        "Диапазое не определен"
+
+
+@app.route('/genre/<genre>')
+def return_genre(genre):
+    try:
+        return jsonify(get_netflix.get_genre(genre))
+    except:
+        "Жанр не найден"
 
 
 if __name__ == "__main__":

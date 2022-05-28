@@ -36,7 +36,7 @@ class SqlSearch:
                         SELECT title, release_year
                         FROM netflix
                         WHERE release_year BETWEEN {one_year} AND {two_year}
-                        LIMIT 100 
+                        LIMIT 100
                         """
         cursor.execute(sqlite_query)
         executed_query = cursor.fetchall()
@@ -45,8 +45,24 @@ class SqlSearch:
             list_release.append({"title": i[0], "release_year": i[1]})
         return list_release
 
+    def get_genre(self, genre):
+        cursor = self.get_sql()
+        sqlite_query = f"""
+                        SELECT title, description
+                        FROM netflix
+                        WHERE listed_in LIKE '%{genre}%'
+                        ORDER BY release_year DESC
+                        LIMIT 10
+                        """
+        cursor.execute(sqlite_query)
+        executed_query = cursor.fetchall()
+        json_listed_in = []
+        for i in executed_query:
+            json_listed_in.append({"title": i[0], "description": i[1]})
+        return json_listed_in
 
-ade = SqlSearch("netflix.db")
+
+"""ade = SqlSearch("netflix.db")
 
 if __name__ == "__main__":
-    pp(ade.search_range_years(2002, 2010))
+    pp(ade.get_genre("Shows"))"""
