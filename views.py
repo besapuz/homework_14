@@ -1,13 +1,26 @@
 from flask import Flask, jsonify
 
-from run import search_title
+from utils import SqlSearch
 
 app = Flask(__name__)
+
+get_netflix = SqlSearch("netflix.db")
 
 
 @app.route('/movie/<title>')
 def return_title(title):
-    return jsonify(search_title(title))
+    try:
+        return jsonify(get_netflix.search_title(title))
+    except:
+        return "Совпадений не найдено"
+
+
+@app.route('/movie/<int:one_year>/to/<int:two_year>')
+def return_release_year(one_year, two_year):
+    try:
+        return jsonify(get_netflix.search_range_years(one_year, two_year))
+    except:
+        "Фильмы не найдены"
 
 
 if __name__ == "__main__":
