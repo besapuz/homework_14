@@ -4,31 +4,30 @@ from utils import SqlSearch
 
 app = Flask(__name__)
 
+app.config['JSON_AS_ASCII'] = False
+app.config['JSON_SORT_KEYS'] = False
+
 get_netflix = SqlSearch("netflix.db")
 
 
 @app.route('/movie/<title>')
 def return_title(title):
-    try:
-        return jsonify(get_netflix.search_title(title))
-    except:
-        return "Совпадений не найдено"
+    return jsonify(get_netflix.search_title(title))
 
 
 @app.route('/movie/<int:one_year>/to/<int:two_year>')
 def return_release_year(one_year, two_year):
-    try:
-        return jsonify(get_netflix.search_range_years(one_year, two_year))
-    except:
-        "Диапазое не определен"
+    return jsonify(get_netflix.search_range_years(one_year, two_year))
 
 
 @app.route('/genre/<genre>')
 def return_genre(genre):
-    try:
-        return jsonify(get_netflix.get_genre(genre))
-    except:
-        "Жанр не найден"
+    return jsonify(get_netflix.get_genre(genre))
+
+
+@app.route('/rating/<rating>')
+def return_rating(rating):
+    return jsonify(get_netflix.get_rating_movie(rating))
 
 
 if __name__ == "__main__":

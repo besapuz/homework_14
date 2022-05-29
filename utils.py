@@ -1,4 +1,5 @@
 import sqlite3
+from collections import Counter
 from pprint import pprint as pp
 
 
@@ -42,7 +43,8 @@ class SqlSearch:
         executed_query = cursor.fetchall()
         list_release = []
         for i in executed_query:
-            list_release.append({"title": i[0], "release_year": i[1]})
+            list_release.append({"title": i[0],
+                                 "release_year": i[1]})
         return list_release
 
     def get_genre(self, genre):
@@ -58,11 +60,73 @@ class SqlSearch:
         executed_query = cursor.fetchall()
         json_listed_in = []
         for i in executed_query:
-            json_listed_in.append({"title": i[0], "description": i[1]})
+            json_listed_in.append({"title": i[0],
+                                   "description": i[1]})
         return json_listed_in
 
+    def get_rating_movie(self, rating):
+        cursor = self.get_sql()
+        rating_list = {
+            "children": "G",
+            "family": "'G', 'PG', 'PG-13'",
+            "adult": "'R', 'NC-17'"
+        }
+        if rating not in rating_list:
+            return "Нет такого рейтинга"
+        query = f"""
+                    SELECT title, rating, description
+                    FROM netflix
+                    WHERE rating IN ({rating_list[rating]})
+                    """
+        cursor.execute(query)
+        executed_query = cursor.fetchall()
+        json_rating = []
+        for i in executed_query:
+            json_rating.append({
+                "title": i[0],
+                "rating": i[1],
+                "description": i[2]
+            })
+        return json_rating
 
-"""ade = SqlSearch("netflix.db")
+    def cast_partner(self, actor_1, actor_2):
+        cursor = self.get_sql()
+        query = f"""
+                SELECT "cast"
+                FROM netflix
+                WHERE "cast" LIKE '%{actor_1}%'
+                AND "cast" LIKE '%{actor_2}%'"""
+        cursor.execute(query)
+        executed_query = cursor.fetchall()
+        actor_list = []
+        for cast in executed_query:
+            actor_list.extend(cast[0].split(', '))
+        counter = Counter(actor_list)
+        result_list = []
+        for actor, count in counter.items():
+            if actor not in [actor_1, actor_2] and count > 2:
+                result_list.append(actor)
+        return result_list
+
+    def get_list_movie(self, type_, year, genre):
+        cursor = self.get_sql()
+        query = f"""select title, description 
+        from netflix 
+        where type LIKE '{type_}' 
+        and listed_in = '{year}'
+        and release_year = '{genre}'"""
+        cursor.execute(query)
+        executed_query = cursor.fetchall()
+        list_movie =[]
+        for i in executed_query:
+            list_movie.append({
+                "title": i[0],
+                "description": i[1]
+            })
+        return list_movie
+
+
+ade = SqlSearch("netflix.db")
 
 if __name__ == "__main__":
-    pp(ade.get_genre("Shows"))"""
+    pp(ade.get_list_movie('movie', 'Dramas', '2002'))
