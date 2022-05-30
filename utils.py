@@ -23,13 +23,16 @@ class SqlSearch:
                 """
         cursor.execute(sqlite_query)
         executed_query = cursor.fetchall()
-        return {
-            "title": executed_query[0][0],
-            "country": executed_query[0][1],
-            "release_year": executed_query[0][2],
-            "genre": executed_query[0][3],
-            "description": executed_query[0][4]
-        }
+        if executed_query:
+            return {
+                "title": executed_query[0][0],
+                "country": executed_query[0][1],
+                "release_year": executed_query[0][2],
+                "genre": executed_query[0][3],
+                "description": executed_query[0][4]
+            }
+        else:
+            return "Список пустой"
 
     def search_range_years(self, one_year, two_year):
         cursor = self.get_sql()
@@ -67,7 +70,7 @@ class SqlSearch:
     def get_rating_movie(self, rating):
         cursor = self.get_sql()
         rating_list = {
-            "children": "G",
+            "children": "'G'",
             "family": "'G', 'PG', 'PG-13'",
             "adult": "'R', 'NC-17'"
         }
@@ -112,12 +115,13 @@ class SqlSearch:
         cursor = self.get_sql()
         query = f"""select title, description 
         from netflix 
-        where type LIKE '{type_}' 
-        and listed_in = '{year}'
-        and release_year = '{genre}'"""
+        where type = '{type_}' COLLATE NOCASE
+        and listed_in = '{year}' COLLATE NOCASE
+        and release_year = '{genre}' COLLATE NOCASE
+        """
         cursor.execute(query)
         executed_query = cursor.fetchall()
-        list_movie =[]
+        list_movie = []
         for i in executed_query:
             list_movie.append({
                 "title": i[0],
@@ -129,4 +133,4 @@ class SqlSearch:
 ade = SqlSearch("netflix.db")
 
 if __name__ == "__main__":
-    pp(ade.get_list_movie('movie', 'Dramas', '2002'))
+    pp(ade.get_list_movie('movie', 'dramas', '2002'))
